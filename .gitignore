@@ -1,0 +1,8 @@
+# Ignorovat celý adresář output a vše uvnitř
+output/
+
+# Ignorovat všechny .bin soubory kdekoliv v projektu
+*.bin
+
+# Ignorovat všechny soubory začínající na brdc kdekoliv v projektu
+brdc*
