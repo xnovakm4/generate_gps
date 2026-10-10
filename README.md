@@ -36,7 +36,7 @@ This tool generates GPS signal simulation data using [gps-sdr-sim](https://githu
    make
    ```
 
-2. Copy the `generate_gps.py` script to the gps-sdr-sim directory
+2. Copy the compiled `gps-sdr-sim` binary next to `generate_gps.py` (or run the script from the directory that contains the binary)
 
 3. Create a `.netrc` file in your home directory with your NASA Earthdata credentials:
    ```bash
@@ -68,7 +68,7 @@ python generate_gps.py [options]
 --duration INT      Total simulation duration in seconds (default: 1800 = 30 minutes)
 --segment-duration INT  Duration of each segment in seconds (default: 300 = 5 minutes)
 --date YYYYMMDD     Simulation date (default: today)
---time HHMMSS       Simulation time in UTC-2 (default: current time)
+--time HHMMSS       Simulation start time in UTC (default: current UTC time minus 2 hours)
 --prefix STRING     Output file prefix (default: $GPS_PREFIX or "gpssim"; in Docker "/output/gpssim")
 ```
 
@@ -82,6 +82,35 @@ This will generate GPS simulation data for Brno, Czech Republic at 300m altitude
 
 ## Docker Usage
 
+### Quick Start with `run.sh`
+
+The easiest way to run the generator is the `run.sh` script:
+
+1. Copy `.env.example` to `.env` and fill in your NASA Earthdata credentials:
+   ```bash
+   cp .env.example .env
+   chmod 600 .env
+   ```
+   `.env` is ignored by git, so your credentials never end up in the repository.
+
+2. Run the script:
+   ```bash
+   ./run.sh
+   ```
+
+On the first run, `run.sh` builds the Docker image `generate_gps` from the local `Dockerfile` (later runs reuse it). Without arguments it generates 10 minutes of data for Brno in two 5-minute segments. Any arguments are passed to `generate_gps.py`:
+
+```bash
+./run.sh --lat 50.0755 --lon 14.4378 --duration 900 --prefix /output/gps-prague
+```
+
+Output files are written to the local `output` directory. Use `--prefix /output/...` so that the files end up there.
+
+`run.sh` honours these environment variables:
+
+- `IMAGE`: Docker image to use (default: `generate_gps`), e.g. `IMAGE=xnovakm4/generate_gps ./run.sh`
+- `REBUILD=1`: force rebuilding the image, e.g. after changing `generate_gps.py` or `Dockerfile`
+
 ### Pull from Docker Hub
 
 ```bash
@@ -94,8 +123,7 @@ The image is available for both `linux/amd64` and `linux/arm64` platforms.
 
 ```bash
 docker run --rm \
-  -e EARTHDATA_USER=your_username \
-  -e EARTHDATA_PASS=your_password \
+  --env-file .env \
   -v "$(pwd)/output:/output" \
   xnovakm4/generate_gps \
   [options]
@@ -106,18 +134,17 @@ docker run --rm \
 - `EARTHDATA_USER`: Your NASA Earthdata username
 - `EARTHDATA_PASS`: Your NASA Earthdata password
 
-Instead of passing credentials on the command line, you can copy `.env.example` to `.env`, fill in your credentials and use `--env-file .env` (as `run.sh` does). `.env` is ignored by git.
+Keep them in a `.env` file (see `.env.example`) and pass it with `--env-file .env`. You can also pass them with `-e EARTHDATA_USER=... -e EARTHDATA_PASS=...`, but then the password ends up in your shell history.
 
 ### Volume Mounts
 
-- Mount a local directory to `/output` to save the generated files
+- Mount a local directory to `/output` to save the generated files. Inside the container the default prefix is `/output/gpssim`, so the files land there even without `--prefix`.
 
 ### Example
 
 ```bash
 docker run --rm \
-  -e EARTHDATA_USER=your_username \
-  -e EARTHDATA_PASS=your_password \
+  --env-file .env \
   -v "$(pwd)/output:/output" \
   xnovakm4/generate_gps \
   --lat 49.1951 --lon 16.6068 \
@@ -154,12 +181,15 @@ cd generate_gps
 docker build -t generate_gps .
 ```
 
+`run.sh` does this automatically when the image does not exist yet.
+
 ## Notes
 
 - The script automatically downloads the required ephemeris data from NASA's CDDIS archive
 - Authentication with NASA Earthdata is required to download ephemeris files
 - The simulation is split into segments to manage file sizes and memory usage
-- The default time is set to UTC-2
+- The default start time is the current UTC time minus 2 hours
+- The ephemeris file for the current day may not be available on CDDIS yet. If the download fails, use `--date` with an earlier day
 
 ## License
 

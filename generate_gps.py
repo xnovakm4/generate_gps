@@ -73,7 +73,7 @@ def main():
     parser.add_argument("--duration", type=int, default=1800, help="Celková délka simulace v sekundách (např. 1800 = 30 minut)")
     parser.add_argument("--segment-duration", type=int, default=300, help="Délka jednoho segmentu (např. 300 = 5 minut)")
     parser.add_argument("--date", type=str, help="Datum simulace ve formátu YYYYMMDD (default: dnes)")
-    parser.add_argument("--time", type=str, help="Čas simulace ve formátu HHMMSS (default: aktuální UTC čas - 2 hodiny)")
+    parser.add_argument("--time", type=str, help="Čas začátku simulace v UTC ve formátu HHMMSS (default: aktuální UTC čas - 2 hodiny)")
     parser.add_argument("--prefix", type=str, default=os.environ.get("GPS_PREFIX", "gpssim"),
                         help="Prefix výstupních souborů (default: $GPS_PREFIX nebo gpssim)")
     args = parser.parse_args()
