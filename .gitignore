@@ -6,3 +6,11 @@ output/
 
 # Ignorovat všechny soubory začínající na brdc kdekoliv v projektu
 brdc*
+
+# Přihlašovací údaje
+.env
+
+# Zkompilovaná binárka gps-sdr-sim (Dockerfile si ji kompiluje sám)
+gps-sdr-sim
+
+__pycache__/

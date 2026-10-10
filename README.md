@@ -69,7 +69,7 @@ python generate_gps.py [options]
 --segment-duration INT  Duration of each segment in seconds (default: 300 = 5 minutes)
 --date YYYYMMDD     Simulation date (default: today)
 --time HHMMSS       Simulation time in UTC-2 (default: current time)
---prefix STRING     Output file prefix (default: "gpssim")
+--prefix STRING     Output file prefix (default: $GPS_PREFIX or "gpssim"; in Docker "/output/gpssim")
 ```
 
 ### Example
@@ -105,6 +105,8 @@ docker run --rm \
 
 - `EARTHDATA_USER`: Your NASA Earthdata username
 - `EARTHDATA_PASS`: Your NASA Earthdata password
+
+Instead of passing credentials on the command line, you can copy `.env.example` to `.env`, fill in your credentials and use `--env-file .env` (as `run.sh` does). `.env` is ignored by git.
 
 ### Volume Mounts
 
@@ -147,7 +149,7 @@ The script estimates the size of each segment file. With the default sample rate
 If you want to build the Docker image yourself:
 
 ```bash
-git clone https://github.com/your-username/generate_gps.git
+git clone https://github.com/xnovakm4/generate_gps.git
 cd generate_gps
 docker build -t generate_gps .
 ```

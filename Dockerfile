@@ -4,7 +4,6 @@ FROM python:3.10-slim
 RUN apt-get update && apt-get install -y \
     build-essential \
     git \
-    cmake \
     wget \
     gzip \
     tzdata \
@@ -20,6 +19,9 @@ RUN git clone https://github.com/osqzss/gps-sdr-sim.git /opt/gps-sdr-sim && \
 COPY generate_gps.py /app/generate_gps.py
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+ENV GPS_PREFIX=/output/gpssim \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
